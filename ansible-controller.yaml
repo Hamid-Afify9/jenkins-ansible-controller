@@ -13,18 +13,19 @@
 
 # create virtual venv to install python package
     - name: create virtual venv
-      command: python3 -m venv /opt/venv
+      command: python3 -m venv .venv/ansible
       args:
-        creates: /opt/venv
-        
+        creates: .venv/ansible
+
 # activate virtual venv
     - name: activate virtual venv
-      command: source /opt/venv/bin/activate
-      args:
-        chdir: /opt/venv
+      command: source .venv/ansible/bin/activate
+      # args:
+      #   chdir: .venv/ansible
 
     - name: install python3, boto3
       pip:
+        #executable: .venv/ansible/bin/pip3
         name:
           - boto3
           - botocore
@@ -35,7 +36,7 @@
 #deactivate virtual venv
     - name: deactivate virtual venv
       command: deactivate
-      args:
-        chdir: /opt/venv          
+      # args:
+      #   chdir: /opt/venv          
           
       
