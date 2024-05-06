@@ -7,8 +7,22 @@
         name: 
           - ansible
           - python3-pip
+          - python3-venv
         state: present
         update_cache: yes
+
+# create virtual venv to install python package
+    - name: create virtual venv
+      command: python3 -m venv /opt/venv
+      args:
+        creates: /opt/venv
+        
+# activate virtual venv
+    - name: activate virtual venv
+      command: source /opt/venv/bin/activate
+      args:
+        chdir: /opt/venv
+
     - name: install python3, boto3
       pip:
         name:
@@ -17,5 +31,11 @@
           #- docker
           #- docker-compose
           #- ansible
+
+#deactivate virtual venv
+    - name: deactivate virtual venv
+      command: deactivate
+      args:
+        chdir: /opt/venv          
           
       
