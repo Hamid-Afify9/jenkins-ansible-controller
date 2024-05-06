@@ -1,0 +1,88 @@
+--- 
+- name: install docker and update the system
+  hosts: docker_server
+  become: yes
+  tasks:
+    - name: install python docker package
+      pip:
+        executable: /usr/bin/pip3
+        name: 
+          - docker
+          - docker-compose
+          - boto3
+          - botocore
+
+    - name: install docker
+      yum:
+        name: docker
+        state: present
+        update_cache: yes
+
+    - name: download docker-compose package
+      become: yes   
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-Linux-{{lookup('pipe', 'uname -m')}}
+        dest: /usr/local/bin/docker-compose
+        mode: 0755     
+
+    - name: start docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: add user to docker group 
+  hosts: docker_server
+  become: yes
+  tasks:
+    - name: add user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: reconnec to the session
+      meta: reset_connection
+    - name: verify user in thee group
+      command: groups
+      #register: user_groups
+    #- debug: msg={{user_groups}}     
+
+- name: utilizing docker to pull and run 
+  hosts: docker_server
+  # vars_prompt:
+  #   - name: "username"
+  #     prompt: "Enter your docker username"
+  #     private: no
+  #   - name: "password"
+  #     prompt: "Enter your docker password"
+  #     private: yes
+  vars_files:
+    - /mnt/01D93F0B2A6F7D00/DevOps-ITI/Ansible-Nexus/project-vars    
+  tasks:
+    - name: copy docker-compose file to the docker_server
+      copy:
+        src: /mnt/01D93F0B2A6F7D00/DevOps-ITI/Ansible-Nexus/docker-compose.yaml
+        dest: /home/ec2-user/docker-compose.yaml
+
+    - name: pull and run the docker image
+      docker_image:
+        name: nginx
+        source: pull
+        # ports:
+        #   - "80:80" 
+
+    # - name: docker log in 
+    #   docker_login:
+    #     registry_url: https://index.docker.io/v1/
+    #     username: "username"
+    #     password: "password"   
+
+    - name: start docker compose file
+      docker_compose:
+        project_src: /home/ec2-user/docker-compose.yaml
+        state: present # docker-compose up    
+
+
+
+

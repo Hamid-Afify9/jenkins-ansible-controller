@@ -1,0 +1,145 @@
+- name: install java-8 and update the vm
+  hosts: nexus
+  become: yes
+  tasks:
+    - name: install java-8
+      apt:
+        name: openjdk-8-jre-headless
+        state: present
+
+    - name: update the vm
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: install net-tools, curl and wget
+      apt:
+        pkg:
+          - net-tools
+          - curl
+          - wget
+
+    - name: download nexus
+      get_url:
+        url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+        dest: /opt
+      register: download_nexus
+    - debug: msg={{download_nexus}}
+
+    - name: extract the nexus tar file
+      unarchive:
+        src: "{{download_nexus.dest}}"
+        dest: /opt/
+        remote_src: yes
+      when: download_nexus.changed == True
+
+    - name: find nexus dir to rename
+      find:
+        paths: /opt/
+        patterns: "nexus-*"
+        file_type: directory
+      register: find_nexus_dir
+    - debug: msg={{find_nexus_dir.files[0].path}}
+
+    - name: ckeck if the nexus dir is already renamed
+      stat:
+        path: /opt/nexus
+      register: check_nexus_dir
+    - debug: msg={{check_nexus_dir.stat.exists}}
+
+    - name: rename the nexus dir
+      command: mv "{{find_nexus_dir.files[0].path}}" /opt/nexus
+      when: check_nexus_dir.stat.exists == False
+      # args:
+      #   creates: /opt/nexus
+
+- name: ensure nexus group exists
+  become: yes
+  hosts: nexus
+  tasks:
+    - name: nexus group
+      group:
+        name: nexus
+        state: present
+
+    - name: ensure nexus user exists
+      user:
+        name: nexus
+        group: nexus
+        state: present
+
+    - name: change the owner of the nexus dir
+      file:
+        path: /opt/nexus
+        owner: nexus
+        group: nexus
+        recurse: yes
+
+    - name: start nexus with user 'nexus'
+      blockinfile:
+        path: /opt/nexus/bin/nexus.rc
+        block: |
+          run_as_user="nexus"
+
+    - name: create nexus service file
+      file:
+        path: /etc/systemd/system/nexus.service
+        state: touch
+        owner: nexus
+        group: nexus
+
+    - name: create nexus as a systemd service.
+      blockinfile:
+        path: /etc/systemd/system/nexus.service
+        block: |
+          [Unit]
+          Description=nexus service
+          After=network.target
+
+          [Service]
+          Type=forking
+          LimitNOFILE=65536
+          ExecStart=/opt/nexus/bin/nexus start
+          ExecStop=/opt/nexus/bin/nexus stop
+          User=nexus
+          Restart=on-abort
+
+          [Install]
+          WantedBy=multi-user.target
+
+- name: reload systemd
+  hosts: nexus
+  become: yes
+  tasks:
+    - name: reload systemd
+      systemd:
+        daemon_reload: yes
+    - name: enable nexus service
+      service:
+        name: nexus
+        enabled: yes
+        state: started
+      register: nexus_service
+    - debug: msg={{nexus_service}}
+
+- name: check statsu of` nexus service
+  hosts: nexus
+  tasks:
+    - name: check netstat
+      shell: netstat -tlpn
+      register: netstat
+    - debug: msg={{netstat}}
+
+    - name: validate the service eith ps aux
+      shell: ps aux | grep nexus
+      register: check_nexus
+    - debug: msg={{chech_nexus.stdout_lines}}
+
+    - name: wait until nexus port is opened
+      pause:
+        minutes: 1
+
+    - name: check nexus port
+      shell: netstat -tlpn
+      register: verify_nexus
+    - debug: msg={{verify_nexus.stdout_lines}}

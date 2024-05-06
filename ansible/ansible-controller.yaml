@@ -1,0 +1,18 @@
+- name: install ansible, boto3, botocorne
+  hosts: ansible-controller
+  tasks:
+    - name: insatll ansibel
+      apt:
+        name: ansible
+        state: present
+        update_cache: yes
+    - name: install python3, boto3
+      pip:
+        name:
+          - boto3
+          - botocore
+          #- docker
+          #- docker-compose
+          #- ansible
+          
+      

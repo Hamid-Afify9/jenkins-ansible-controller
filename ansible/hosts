@@ -1,0 +1,9 @@
+[nexus]
+34.233.174.35  ansible_ssh_private_key_file=~/.ssh/again ansible_user=ubuntu
+
+[docker_server]
+44.197.255.109 ansible_ssh_private_key_file=~/.ssh/again ansible_user=ec2-user  
+
+[ansible-controller]
+ip   ansible_ssh_private_key_file=~/.ssh/again ansible_user=ec2-user 
+ 

@@ -1,0 +1,8 @@
+- name: shutting down the vm 
+  hosts: nexus
+  become: true
+  tasks:
+    - name: shutdown the nexus vm
+      shell: shutdown  now
+      register: shutdown_vm
+    - debug: msg={{shutdown_vm}}
