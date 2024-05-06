@@ -1,22 +1,26 @@
 pipeline {
     agent any
+    environment {
+        ansible_controller = "54.204.24.103"
+    }
 
     stages {
         stage('print hello'){
             steps {
+                sshagent (credentials: ['ansible-server']) {
                 echo 'Hello World'
-                sh 'ansible-playbook -i hosts ansible-controller.yaml -u ubuntu '
+                sh 'ansible-playbook -i hosts ansible-controller.yaml -u ubuntu '}
             }
         }
 
         stage('copying ansible files to ansible-controller') {
             steps {
                 echo 'Copying files to ansible-controller'
-                sshagent (credentials: ['jenkins-ssh']) {
-                    sh 'scp -o StrictHostKeyChecking=no ansible/*  ubuntu@ip:/root/hello.txt '
-                    withCredentials([sshUserPrivateKey(credentialsId: 'id-here', keyFileVariable: 'keyfile', usernameVariable: 'user' )])
+                sshagent (credentials: ['ansible-server']) {
+                    sh 'scp -o StrictHostKeyChecking=no ansible/*  ubuntu@${ansible_controller}:/root/ '
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server', keyFileVariable: 'keyfile', usernameVariable: 'ubuntu' )])
                     {
-                        sh 'scp ${keyfile}  ubuntu@ip:root/ssh-key.pem '
+                        sh 'scp ${keyfile}  ubuntu@$ansible_controller:root/ssh-key.pem '
                     }
             }
 
@@ -27,7 +31,7 @@ pipeline {
             //     steps {
             //         echo 'Running the playbook on ansible-controller'
             //         def remote = [:]
-            //         remote.name = 'ansible-controller'
+            //         remote.name = 'ansible_controller'
             //         remote.host = 'ip'
             //         //remote.user = 'root'
             //        //remote.password = 'password'
