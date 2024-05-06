@@ -1,7 +1,8 @@
 - name: install ansible, boto3, botocorne
   hosts: ansible-controller
+  become: yes
   tasks:
-    - name: insatll ansibel
+    - name: insatll ansible
       apt:
         name: ansible
         state: present
