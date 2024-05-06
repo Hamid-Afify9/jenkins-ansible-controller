@@ -34,11 +34,11 @@ pipeline {
                 echo 'Running the playbook on ansible-controller'
                 def remote = [:]
                 remote.name = 'ansible_controller'
-                remote.host = 'ip'
+                remote.host = ${ansible_controller}
                 //remote.user = 'root'
                 //remote.password = 'password'
                 remote.allowAnyHosts = true
-                    withCredentials([sshUserPrivateKey(credentialsId: 'id-here', keyFileVariable: 'keyfile', usernameVariable: 'user' )])
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server', keyFileVariable: 'keyfile', usernameVariable: 'user' )])
                     {
                     remote.identityFile = keyfile
                     remote.user= user
