@@ -26,25 +26,25 @@ pipeline {
 
 
             }
-            // first install this plugin 'SSH Pipeline Steps'
-            // stage('run the play-book on ansible-controller') {
-            //     steps {
-            //         echo 'Running the playbook on ansible-controller'
-            //         def remote = [:]
-            //         remote.name = 'ansible_controller'
-            //         remote.host = 'ip'
-            //         //remote.user = 'root'
-            //        //remote.password = 'password'
-            //         remote.allowAnyHosts = true
-            //             withCredentials([sshUserPrivateKey(credentialsId: 'id-here', keyFileVariable: 'keyfile', usernameVariable: 'user' )])
-            //             {
-            //             remote.identityFile = keyfile
-            //             remote.user= user
-            //             sshCommand remote: remote, command: 'ansible-playbook /root/hello.txt -i /root/hosts -u ubuntu '
+            first install this plugin 'SSH Pipeline Steps'
+            stage('run the play-book on ansible-controller') {
+                steps {
+                    echo 'Running the playbook on ansible-controller'
+                    def remote = [:]
+                    remote.name = 'ansible_controller'
+                    remote.host = 'ip'
+                    //remote.user = 'root'
+                   //remote.password = 'password'
+                    remote.allowAnyHosts = true
+                        withCredentials([sshUserPrivateKey(credentialsId: 'id-here', keyFileVariable: 'keyfile', usernameVariable: 'user' )])
+                        {
+                        remote.identityFile = keyfile
+                        remote.user= user
+                        sshCommand remote: remote, command: 'ansible-playbook /root/nexus.yaml -i /root/hosts -u ubuntu '
 
-            //             }
-            //     }
-            // }
+                        }
+                }
+            }
         }
     }
 }
