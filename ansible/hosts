@@ -5,5 +5,5 @@
 44.197.255.109 ansible_ssh_private_key_file=~/.ssh/again ansible_user=ec2-user  
 
 [ansible-controller]
-54.204.24.103  ansible_ssh_private_key_file=~/.ssh/again ansible_user=ec2-user 
+54.204.24.103  ansible_ssh_private_key_file=~/.ssh/again ansible_user=ubuntu 
  

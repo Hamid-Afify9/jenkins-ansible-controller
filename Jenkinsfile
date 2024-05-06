@@ -9,7 +9,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['ansible-server']) {
                 echo 'Hello World'
-                sh 'ansible-playbook  ansible-controller.yaml -i hosts '}
+                sh 'ansible-playbook  ansible/ansible-controller.yaml -i ansible/hosts '}
             }
         }
 
