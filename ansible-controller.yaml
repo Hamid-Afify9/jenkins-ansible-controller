@@ -4,7 +4,9 @@
   tasks:
     - name: insatll ansible
       apt:
-        name: ansible
+        name: 
+          - ansible
+          - python3-pip
         state: present
         update_cache: yes
     - name: install python3, boto3
