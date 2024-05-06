@@ -26,7 +26,7 @@ pipeline {
 
 
             }
-            first install this plugin 'SSH Pipeline Steps'
+            //first install this plugin 'SSH Pipeline Steps'
             stage('run the play-book on ansible-controller') {
                 steps {
                     echo 'Running the playbook on ansible-controller'
