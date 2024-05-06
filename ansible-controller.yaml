@@ -13,30 +13,30 @@
 
 # create virtual venv to install python package
     - name: create virtual venv
-      command: python3 -m venv .venv/ansible
+      command: python3 -m venv venv/ansible
       args:
-        creates: .venv/ansible
+        creates: venv/ansible # only run if the directory does not exist-idempotency check 
 
 # activate virtual venv
     - name: activate virtual venv
-      command: source .venv/ansible/bin/activate
+      command: source venv/ansible/bin/activate
       # args:
-      #   chdir: .venv/ansible
+      #   chdir: venv/ansible/bin/  
 
     - name: install python3, boto3
       pip:
-        #executable: .venv/ansible/bin/pip3
+        #executable: venv/ansible/bin/pip3
         name:
           - boto3
           - botocore
           #- docker
           #- docker-compose
-          #- ansible
+
 
 #deactivate virtual venv
     - name: deactivate virtual venv
       command: deactivate
       # args:
-      #   chdir: /opt/venv          
+      #   chdir: venv/ansible/bin/         
           
       
