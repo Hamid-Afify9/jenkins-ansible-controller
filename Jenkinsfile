@@ -17,11 +17,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    try {
-                        echo 'Deploying....'
-                    } catch (Exception e) {
-                        currentBuild.result = 'UNSTABLE'
-                        throw e
+                    
                         catchError (buildResult = currentBuild.result, stageResult: 'FAILURE')
                             sh "exit 1"
                         }
