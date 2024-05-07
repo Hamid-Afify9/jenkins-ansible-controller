@@ -13,7 +13,7 @@ pipeline {
                     }
                 }
             
-        
+        // mark this as red flag in jenkins
         stage('Deploy') {
             steps {
                 script {
@@ -22,6 +22,10 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'UNSTABLE'
                         throw e
+                        catchError (buildResult = currentBuild.result, stageResult: 'FAILURE')
+                            sh "exit 1"
+                        }
+                        
                     }
                 }
             }
