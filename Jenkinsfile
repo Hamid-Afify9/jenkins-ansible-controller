@@ -18,8 +18,11 @@ pipeline {
             steps {
                 script {
                     
-                        catchError (buildResult = currentBuild.result, stageResult: 'FAILURE')
+                        catchError (buildResult = "SUCCESS", stageResult: 'FAILURE')
                             sh "exit 1"
+                            ansiColor('blue')
+                            //buildResult: doesnt stop/fail the pipeline
+                            //but stageResult: mark this stage as failed
                         }
                         
                     }
