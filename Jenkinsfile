@@ -1,52 +1,30 @@
+//use try and catch to mark a stage as unstable in the third stage test, build, deploy
 pipeline {
     agent any
-    environment {
-        ansible_controller = "54.204.24.103"
-    }
-
     stages {
-        stage('print hello'){
+        stage('Build') {
             steps {
-                sshagent (credentials: ['ansible-server']) {
-                echo 'Hello World'
-                sh 'ansible-playbook  ansible/ansible-controller.yaml -i ansible/hosts '}
+                echo 'Building..'
             }
         }
-
-        stage('copying ansible files to ansible-controller') {
+        stage('Test') {
             steps {
-                echo 'Copying files to ansible-controller'
-                sshagent (credentials: ['ansible-server']) {
-                    sh 'scp -o StrictHostKeyChecking=no ansible/*  ubuntu@${ansible_controller}:/root/ '
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server', keyFileVariable: 'keyfile', usernameVariable: 'ubuntu' )])
-                    {
-                        sh 'scp ${keyfile}  ubuntu@$ansible_controller:root/ssh-key.pem '
+                        echo 'Testing..'
                     }
-            }
-        }
-        }
-
-
+                }
+            
         
-        //first install this plugin 'SSH Pipeline Steps'
-        stage('run the play-book on ansible-controller') {
+        stage('Deploy') {
             steps {
-                echo 'Running the playbook on ansible-controller'
-                def remote = [:]
-                remote.name = 'ansible_controller'
-                remote.host = ${ansible_controller}
-                //remote.user = 'root'
-                //remote.password = 'password'
-                remote.allowAnyHosts = true
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ansible-server', keyFileVariable: 'keyfile', usernameVariable: 'user' )])
-                    {
-                    remote.identityFile = keyfile
-                    remote.user= user
-                    sshCommand remote: remote, command: 'ansible-playbook /root/nexus.yaml -i /root/hosts -u ubuntu '
-
+                script {
+                    try {
+                        echo 'Deploying....'
+                    } catch (Exception e) {
+                        currentBuild.result = 'UNSTABLE'
+                        throw e
                     }
+                }
             }
         }
     }
 }
-
